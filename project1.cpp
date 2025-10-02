@@ -92,9 +92,24 @@ int main(int argc, char* argv[]) {
 
             instructions.push_back(str);
 
+            // Only increment when in .data section, the line is not empty, starts with a label (xxx:),
+            // the second element is ".word".
+            // Expecting output like static_memory = {"val1" : 0, "arr" : 4, "val1" : 16}
+            if (!in_text && parts.size() >= 2 && !parts[0].empty() && parts[0].back() == ':' && parts[1] == ".word") {
+                std::string label = parts[0];
+                label.pop_back();  // delete ':'
+                for (std::string l : { label }) {
+                    static_memory[l] = static_mem_body;
+                }
+                pending_labels.clear();
+                int cnt = (int)parts.size() - 2;        // number of elements after .word
+                static_mem_body += 4 * cnt; 
+            }     
+                    
             // Only increment line_num when in .text section, the line is not empty, 
             // not a directive (.globl/.data/.text), not a label (xxx:), 
             // and is a valid MIPS instruction (like addi, lw, beq).
+            // Expecting output like offsets = {"main" : 0, "loop" : 1, "end" : 3}
             if (in_text && (parts.size() >= 1) && str.at(0) != '.' && parts[0].back() != ':' && MIPS_OPS.count(parts[0])) {
                 for (auto label : pending_labels) {
                     offsets[label] = line_num;
@@ -107,37 +122,33 @@ int main(int argc, char* argv[]) {
     }
 
 
-
     /** Phase 2
      * Process all static memory, output to static memory file
      * TODO: All of this
      */
 
-     int memory_address = 0; // Address within static memory (starts at 0)
+    int memory_address = 0; // Address within static memory (starts at 0)
     for (std::string inst : instructions) {
         std::vector<std::string> terms = split(inst, WHITESPACE+",()");
         
-        // Check if it's a static memory declaration like "a: .word 1"
-        if (terms.size() >= 2 && terms[1] == ".word") {
-            std::string label = terms[0];
-            if (label.back() == ':') label.pop_back();
+        std::string label = terms[0];
+        if (label.back() == ':') {
+            label.pop_back();
+        }
 
-            static_memory[label] = memory_address; // Assign memory address to label
+        // Loop through all values after ".word"
+        for (int i = 2; i < terms.size(); ++i) {
+            int value;
 
-            // Loop through all values after ".word"
-            for (int i = 2; i < terms.size(); ++i) {
-                int value;
-
-                // If the term is a known label, use its offset
-                if (offsets.find(terms[i]) != offsets.end()) {
-                    value = offsets.at(terms[i]) * 4;
-                } else {
-                    value = stoi(terms[i]);
-                }
-
-                write_binary(value, static_outfile);
-                memory_address += 4;
+            // If the term is a known label, use its offset
+            if (offsets.find(terms[i]) != offsets.end()) {
+                value = offsets.at(terms[i]) * 4;
+            } else {
+                value = stoi(terms[i]);  // Not a label, regard it as an element
             }
+
+            write_binary(value, static_outfile);
+            memory_address += 4;
         }
     }
 
