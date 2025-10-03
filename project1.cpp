@@ -174,6 +174,7 @@ int main(int argc, char* argv[]) {
      * ex^: for an instruction add rd, rs, rt
      * rd is terms[1], rs is terms[2], rt is terms[3] (for add instruction, not all of them)
      * this is the expected order for r-types: int encode_Rtype(int opcode, int rs, int rt, int rd, int shftamt, int funccode)
+     * TODO: FIX  srl, sll, beq, and bne
      */
      int i = 0; // counter that is used for finding offset in beq and bne instructions
      for(std::string inst : instructions) {
@@ -186,11 +187,13 @@ int main(int argc, char* argv[]) {
             int result = encode_Rtype(0,registers[terms[2]], registers[terms[3]], registers[terms[1]], 0, 34);
             write_binary(encode_Rtype(0,registers[terms[2]], registers[terms[3]], registers[terms[1]], 0, 34),inst_outfile);
         } else if (inst_type == "sll") {
-            int result = encode_Rtype(0,0, registers[terms[2]], registers[terms[1]], registers[terms[3]], 0);
-            write_binary(encode_Rtype(0,0, registers[terms[2]], registers[terms[1]], registers[terms[3]], 0), inst_outfile);
+            int shamt = std::stoi(terms[3]);
+            int result = encode_Rtype(0,0, registers[terms[2]], registers[terms[1]], shamt, 0);
+            write_binary(encode_Rtype(0,0, registers[terms[2]], registers[terms[1]], shamt, 0), inst_outfile);
         } else if (inst_type == "srl") {
-            int result = encode_Rtype(0,0, registers[terms[2]], registers[terms[1]], registers[terms[3]], 2);
-            write_binary(encode_Rtype(0,0, registers[terms[2]], registers[terms[1]], registers[terms[3]], 2), inst_outfile);
+            int shamt = std::stoi(terms[3]);
+            int result = encode_Rtype(0,0, registers[terms[2]], registers[terms[1]], shamt, 2);
+            write_binary(encode_Rtype(0,0, registers[terms[2]], registers[terms[1]], shamt, 2), inst_outfile);
         } else if (inst_type == "mult") {
             int result = encode_Rtype(0, registers[terms[1]], registers[terms[2]], 0, 0, 24);
             write_binary(encode_Rtype(0, registers[terms[1]], registers[terms[2]], 0, 0, 24), inst_outfile);
