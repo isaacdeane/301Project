@@ -174,7 +174,7 @@ int main(int argc, char* argv[]) {
      * ex^: for an instruction add rd, rs, rt
      * rd is terms[1], rs is terms[2], rt is terms[3] (for add instruction, not all of them)
      * this is the expected order for r-types: int encode_Rtype(int opcode, int rs, int rt, int rd, int shftamt, int funccode)
-     * TODO: FIX  srl, sll, beq, and bne
+     * TODO: FIX  beq, and bne
      */
      int i = 0; // counter that is used for finding offset in beq and bne instructions
      for(std::string inst : instructions) {
