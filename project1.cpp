@@ -135,7 +135,7 @@ int main(int argc, char* argv[]) {
         std::vector<std::string> terms = split(inst, WHITESPACE+",()");
         
         if (terms.size() < 2) continue;
-        
+
         std::string label = terms[0];
         if (label.back() == ':') {
             label.pop_back();
@@ -255,7 +255,96 @@ int main(int argc, char* argv[]) {
             int address = static_memory[terms[2]];
             int result = encode_Itype(8, registers["$zero"], registers[terms[1]], address);
             write_binary(encode_Itype(8, registers["$zero"], registers[terms[1]], address), inst_outfile);
+
+        // Extra MIPS Instructions
+        } else if (inst_type == "and") {
+            int result = encode_Rtype(0,registers[terms[2]], registers[terms[3]], registers[terms[1]], 0, 36);
+            write_binary(encode_Rtype(0,registers[terms[2]], registers[terms[3]], registers[terms[1]], 0, 36),inst_outfile);
+        } else if (inst_type == "or") {
+            int result = encode_Rtype(0,registers[terms[2]], registers[terms[3]], registers[terms[1]], 0, 37);
+            write_binary(encode_Rtype(0,registers[terms[2]], registers[terms[3]], registers[terms[1]], 0, 37),inst_outfile);
+        } else if (inst_type == "nor") {
+            int result = encode_Rtype(0,registers[terms[2]], registers[terms[3]], registers[terms[1]], 0, 39);
+            write_binary(encode_Rtype(0,registers[terms[2]], registers[terms[3]], registers[terms[1]], 0, 39),inst_outfile);
+        } else if (inst_type == "xor") {
+            int result = encode_Rtype(0,registers[terms[2]], registers[terms[3]], registers[terms[1]], 0, 38);
+            write_binary(encode_Rtype(0,registers[terms[2]], registers[terms[3]], registers[terms[1]], 0, 38),inst_outfile);
+        } else if (inst_type == "andi") {
+            int result = encode_Itype(12,registers[terms[2]], registers[terms[1]], stoi(terms[3]));
+            write_binary(encode_Itype(12,registers[terms[2]], registers[terms[1]], stoi(terms[3])),inst_outfile);
+        } else if (inst_type == "ori") {
+            int result = encode_Itype(13,registers[terms[2]], registers[terms[1]], stoi(terms[3]));
+            write_binary(encode_Itype(13,registers[terms[2]], registers[terms[1]], stoi(terms[3])),inst_outfile);
+        } else if (inst_type == "xori") {
+            int result = encode_Itype(14,registers[terms[2]], registers[terms[1]], stoi(terms[3]));
+            write_binary(encode_Itype(14,registers[terms[2]], registers[terms[1]], stoi(terms[3])),inst_outfile);
+        } else if (inst_type == "lui") {
+            int result = encode_Itype(15,0, registers[terms[1]], stoi(terms[3]));
+            write_binary(encode_Itype(15,0, registers[terms[1]], stoi(terms[3])),inst_outfile);
+        } else if (inst_type == "mov") {
+            int result = encode_Rtype(0, registers[terms[2]], 0, registers[terms[1]], 0, 32);
+            write_binary(result, inst_outfile);
+        } else if (inst_type == "li") {
+            int imm = stoi(terms[2]);  // Convert immediate to integer
+            if (imm >= -32768 && imm <= 32767) {  // Fits in 16-bit immediate
+                int result = encode_Itype(8, 0, registers[terms[1]], imm);  // addi $rd, $zero, imm
+                write_binary(result, inst_outfile);
+            } else {  // If immediate is larger than 16 bits, use lui + ori
+                int upper = (imm >> 16) & 0xFFFF;
+                int lower = imm & 0xFFFF;
+                int lui_inst = encode_Itype(15, 0, registers[terms[1]], upper);  // lui $rd, upper
+                int ori_inst = encode_Itype(13, registers[terms[1]], registers[terms[1]], lower);  // ori $rd, $rd, lower
+                write_binary(lui_inst, inst_outfile);
+                write_binary(ori_inst, inst_outfile);
+            }
+        } else if (inst_type == "sge") {
+            int result1 = encode_Rtype(0, registers[terms[1]], registers[terms[2]], registers["$at"], 0, 42);
+            int result2 = encode_Itype(14, registers["$at"], registers["$at"], 1); 
+            write_binary(result1, inst_outfile);
+            write_binary(result2, inst_outfile);
         }
+        else if (inst_type == "sgt") {
+            int result = encode_Rtype(0, registers[terms[2]], registers[terms[1]], registers[terms[1]], 0, 42);
+            write_binary(result, inst_outfile);
+        }else if (inst_type == "sle") {
+            int result1 = encode_Rtype(0, registers[terms[2]], registers[terms[1]], registers["$at"], 0, 42);
+            int result2 = encode_Itype(14, registers["$at"], registers["$at"], 1);
+            write_binary(result1, inst_outfile);
+            write_binary(result2, inst_outfile);
+        }else if (inst_type == "seq") {
+            int result1 = encode_Rtype(0, registers[terms[1]], registers[terms[2]], registers["$at"], 0, 38);
+            int result2 = encode_Itype(10, registers["$at"], registers["$at"], 1);
+            write_binary(result1, inst_outfile);
+            write_binary(result2, inst_outfile);
+        }else if (inst_type == "sne") {
+            int result1 = encode_Rtype(0, registers[terms[1]], registers[terms[2]], registers["$at"], 0, 38);
+            int result2 = encode_Rtype(0, 0, registers["$at"], registers["$at"], 0, 43);
+            write_binary(result1, inst_outfile);
+            write_binary(result2, inst_outfile);
+        } else if (inst_type == "blt") {
+        // slt $at, rs, rt
+        write_binary(encode_Rtype(0, registers[terms[1]], registers[terms[2]], registers["$at"], 0, 42), inst_outfile);
+        // bne $at, $zero, label
+        int off = offsets[terms[3]] - (i + 1);
+        write_binary(encode_Itype(5, registers["$at"], registers["$zero"], off), inst_outfile);
+        } else if (inst_type == "bge") {
+        // slt $at, rs, rt
+        write_binary(encode_Rtype(0, registers[terms[1]], registers[terms[2]], registers["$at"], 0, 42), inst_outfile);
+        // beq $at, $zero, label
+        int off = offsets[terms[3]] - (i + 1);
+        write_binary(encode_Itype(4, registers["$at"], registers["$zero"], off), inst_outfile);
+        } else if (inst_type == "bgt") {
+        // slt $at, rt, rs
+        write_binary(encode_Rtype(0, registers[terms[2]], registers[terms[1]], registers["$at"], 0, 42), inst_outfile);
+        // bne $at, $zero, label
+        int off = offsets[terms[3]] - (i + 1);
+        write_binary(encode_Itype(5, registers["$at"], registers["$zero"], off), inst_outfile);
+        } else if (inst_type == "ble") {
+        // slt $at, rt, rs
+        write_binary(encode_Rtype(0, registers[terms[2]], registers[terms[1]], registers["$at"], 0, 42), inst_outfile);
+        // beq $at, $zero, label
+        int off = offsets[terms[3]] - (i + 1);
+        write_binary(encode_Itype(4, registers["$at"], registers["$zero"], off), inst_outfile);
 i++;} //increment counting index
 
 }
