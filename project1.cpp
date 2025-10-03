@@ -196,9 +196,11 @@ int main(int argc, char* argv[]) {
             // If the term is a known label, use its offset
             try {
                 if (offsets.find(terms[i]) != offsets.end()) {
-                value = offsets.at(terms[i]) * 4;
+                    value = offsets.at(terms[i]) * 4;
+                } else if (static_memory.find(terms[i]) != static_memory.end()) {
+                    value = static_memory.at(terms[i]);
                 } else {
-                value = stoi(terms[i]);  // Not a label, regard it as an element
+                    value = stoi(terms[i]);  // Not a label, regard it as an element
                 }
             } catch (const std::exception& e) {
                 std::cerr << "[Phase2] invalid .word operand: '" << terms[i]
