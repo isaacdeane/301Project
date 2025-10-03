@@ -230,43 +230,55 @@ int main(int argc, char* argv[]) {
         if (inst_type == "add") { // R-TYPES: encode_Rtype(int opcode, int rs, int rt, int rd, int shftamt, int funccode)
             int result = encode_Rtype(0,registers[terms[2]], registers[terms[3]], registers[terms[1]], 0, 32);
             write_binary(encode_Rtype(0,registers[terms[2]], registers[terms[3]], registers[terms[1]], 0, 32),inst_outfile);
+            i++;
         } else if (inst_type == "sub") {
             int result = encode_Rtype(0,registers[terms[2]], registers[terms[3]], registers[terms[1]], 0, 34);
             write_binary(encode_Rtype(0,registers[terms[2]], registers[terms[3]], registers[terms[1]], 0, 34),inst_outfile);
+            i++;
         } else if (inst_type == "sll") {
             int shamt = std::stoi(terms[3]);
             int result = encode_Rtype(0,0, registers[terms[2]], registers[terms[1]], shamt, 0);
             write_binary(encode_Rtype(0,0, registers[terms[2]], registers[terms[1]], shamt, 0), inst_outfile);
+            i++;
         } else if (inst_type == "srl") {
             int shamt = std::stoi(terms[3]);
             int result = encode_Rtype(0,0, registers[terms[2]], registers[terms[1]], shamt, 2);
             write_binary(encode_Rtype(0,0, registers[terms[2]], registers[terms[1]], shamt, 2), inst_outfile);
+            i++;
         } else if (inst_type == "mult") {
             int result = encode_Rtype(0, registers[terms[1]], registers[terms[2]], 0, 0, 24);
             write_binary(encode_Rtype(0, registers[terms[1]], registers[terms[2]], 0, 0, 24), inst_outfile);
+            i++;
         } else if (inst_type == "div") {
             int result = encode_Rtype(0, registers[terms[1]], registers[terms[2]], 0, 0, 26);
             write_binary(encode_Rtype(0, registers[terms[1]], registers[terms[2]], 0, 0, 26), inst_outfile);
+            i++;
         } else if (inst_type == "mflo") {
             int result = encode_Rtype(0, 0, 0, registers[terms[1]], 0, 18);
             write_binary(encode_Rtype(0, 0, 0, registers[terms[1]], 0, 18), inst_outfile);
+            i++;
         } else if (inst_type == "mfhi") {
             int result = encode_Rtype(0, 0, 0, registers[terms[1]], 0, 16);
             write_binary(encode_Rtype(0, 0, 0, registers[terms[1]], 0, 16), inst_outfile);
+            i++;
         } else if (inst_type == "slt") { 
             int result = encode_Rtype(0, registers[terms[2]], registers[terms[3]], registers[terms[1]], 0, 42);
             write_binary(encode_Rtype(0, registers[terms[2]], registers[terms[3]], registers[terms[1]], 0, 42), inst_outfile);
+            i++;
         } else if (inst_type == "jr") { 
             int result = encode_Rtype(0, registers[terms[1]], 0, 0, 0, 8);
             write_binary(encode_Rtype(0, registers[terms[1]], 0, 0, 0, 8), inst_outfile);
+            i++;
         } else if (inst_type == "jalr") {
             if(terms.size() == 3) { // two register jalr 
                 int result = encode_Rtype(0, registers[terms[1]], 0, registers[terms[2]], 0, 9);
                 write_binary(encode_Rtype(0, registers[terms[1]], 0, registers[terms[2]], 0, 9), inst_outfile);
+                i++;
             }
             else if(terms.size() == 2) { // one register jalr
                 int result = encode_Rtype(0, registers[terms[1]], 0, 31, 0, 9);
                 write_binary(encode_Rtype(0, registers[terms[1]], 0, 31, 0, 9), inst_outfile);
+                i++;
             } 
             else {
                 std::cerr << "something is wrong with jalr handling" << std::endl;
@@ -275,72 +287,91 @@ int main(int argc, char* argv[]) {
         } else if (inst_type == "syscall") {
             int result = encode_Rtype(0, 0, 0, 26, 0, 12);
             write_binary(encode_Rtype(0, 0, 0, 26, 0, 12), inst_outfile);
+            i++;
         } else if (inst_type == "addi") { // I-TYPES: encode_Itype(int opcode, int rs, int rt, int immediate)
             int immediate = std::stoi(terms[3]);
             int result = encode_Itype(8, registers[terms[2]], registers[terms[1]], immediate); 
             write_binary(encode_Itype(8, registers[terms[2]], registers[terms[1]], immediate), inst_outfile);
+            i++;
         } else if (inst_type == "lw") {
             int offset = std::stoi(terms[2]);
             int result = encode_Itype(35, registers[terms[3]], registers[terms[1]], offset);
             write_binary(encode_Itype(35, registers[terms[3]], registers[terms[1]], offset), inst_outfile);
+            i++;
         } else if (inst_type == "sw") {
             int offset = std::stoi(terms[2]);
             int result = encode_Itype(43, registers[terms[3]], registers[terms[1]], offset);
             write_binary(encode_Itype(43, registers[terms[3]], registers[terms[1]], offset), inst_outfile);
+            i++;
         } else if (inst_type == "beq") {
             //std::cout << (offsets[terms[3]]) << std::endl;
             int offset = offsets[terms[3]] - (i+1);
             int result = encode_Itype(4, registers[terms[1]], registers[terms[2]], offset);
             write_binary(encode_Itype(4, registers[terms[1]], registers[terms[2]], offset), inst_outfile);
+            i++;
         } else if (inst_type == "bne") {
             //std::cout << offsets[terms[3]] << std::endl;
             int offset = offsets[terms[3]] - (i+1);
             int result = encode_Itype(5, registers[terms[1]], registers[terms[2]], offset);
             write_binary(encode_Itype(5, registers[terms[1]], registers[terms[2]], offset), inst_outfile);
+            i++;
         } else if (inst_type == "j") { //J-TYPES: int encode_Jtype(int opcode, int address)
             int result = encode_Jtype(2, offsets[terms[1]]);
             write_binary(encode_Jtype(2, offsets[terms[1]]), inst_outfile);
+            i++;
         } else if (inst_type == "jal") {
             int result = encode_Jtype(3, offsets[terms[1]]);
-            write_binary(encode_Jtype(3, offsets[terms[1]]), inst_outfile);            
+            write_binary(encode_Jtype(3, offsets[terms[1]]), inst_outfile);       
+            i++;     
         } else if (inst_type == "la") { //PSEUDO-INSTRUCTION (using I-type)
             int address = static_memory[terms[2]];
             int result = encode_Itype(8, registers["$zero"], registers[terms[1]], address);
             write_binary(encode_Itype(8, registers["$zero"], registers[terms[1]], address), inst_outfile);
+            i++;
 
         // Extra MIPS Instructions
         } else if (inst_type == "and") {
             int result = encode_Rtype(0,registers[terms[2]], registers[terms[3]], registers[terms[1]], 0, 36);
             write_binary(encode_Rtype(0,registers[terms[2]], registers[terms[3]], registers[terms[1]], 0, 36),inst_outfile);
+            i++;
         } else if (inst_type == "or") {
             int result = encode_Rtype(0,registers[terms[2]], registers[terms[3]], registers[terms[1]], 0, 37);
             write_binary(encode_Rtype(0,registers[terms[2]], registers[terms[3]], registers[terms[1]], 0, 37),inst_outfile);
+            i++;
         } else if (inst_type == "nor") {
             int result = encode_Rtype(0,registers[terms[2]], registers[terms[3]], registers[terms[1]], 0, 39);
             write_binary(encode_Rtype(0,registers[terms[2]], registers[terms[3]], registers[terms[1]], 0, 39),inst_outfile);
+            i++;
         } else if (inst_type == "xor") {
             int result = encode_Rtype(0,registers[terms[2]], registers[terms[3]], registers[terms[1]], 0, 38);
             write_binary(encode_Rtype(0,registers[terms[2]], registers[terms[3]], registers[terms[1]], 0, 38),inst_outfile);
+            i++;
         } else if (inst_type == "andi") {
             int result = encode_Itype(12,registers[terms[2]], registers[terms[1]], stoi(terms[3]));
             write_binary(encode_Itype(12,registers[terms[2]], registers[terms[1]], stoi(terms[3])),inst_outfile);
+            i++;
         } else if (inst_type == "ori") {
             int result = encode_Itype(13,registers[terms[2]], registers[terms[1]], stoi(terms[3]));
             write_binary(encode_Itype(13,registers[terms[2]], registers[terms[1]], stoi(terms[3])),inst_outfile);
+            i++;
         } else if (inst_type == "xori") {
             int result = encode_Itype(14,registers[terms[2]], registers[terms[1]], stoi(terms[3]));
             write_binary(encode_Itype(14,registers[terms[2]], registers[terms[1]], stoi(terms[3])),inst_outfile);
+            i++;
         } else if (inst_type == "lui") {
             int result = encode_Itype(15,0, registers[terms[1]], stoi(terms[3]));
             write_binary(encode_Itype(15,0, registers[terms[1]], stoi(terms[3])),inst_outfile);
+            i++;
         } else if (inst_type == "mov") {
             int result = encode_Rtype(0, registers[terms[2]], 0, registers[terms[1]], 0, 32);
             write_binary(result, inst_outfile);
+            i++;
         } else if (inst_type == "li") {
             int imm = stoi(terms[2]);  // Convert immediate to integer
             if (imm >= -32768 && imm <= 32767) {  // Fits in 16-bit immediate
                 int result = encode_Itype(8, 0, registers[terms[1]], imm);  // addi $rd, $zero, imm
                 write_binary(result, inst_outfile);
+                i++;
             } else {  // If immediate is larger than 16 bits, use lui + ori
                 int upper = (imm >> 16) & 0xFFFF;
                 int lower = imm & 0xFFFF;
@@ -348,55 +379,65 @@ int main(int argc, char* argv[]) {
                 int ori_inst = encode_Itype(13, registers[terms[1]], registers[terms[1]], lower);  // ori $rd, $rd, lower
                 write_binary(lui_inst, inst_outfile);
                 write_binary(ori_inst, inst_outfile);
+                i++;
             }
         } else if (inst_type == "sge") {
             int result1 = encode_Rtype(0, registers[terms[1]], registers[terms[2]], registers["$at"], 0, 42);
             int result2 = encode_Itype(14, registers["$at"], registers["$at"], 1); 
             write_binary(result1, inst_outfile);
             write_binary(result2, inst_outfile);
+            i++;
         }
         else if (inst_type == "sgt") {
             int result = encode_Rtype(0, registers[terms[2]], registers[terms[1]], registers[terms[1]], 0, 42);
             write_binary(result, inst_outfile);
+            i++;
         }else if (inst_type == "sle") {
             int result1 = encode_Rtype(0, registers[terms[2]], registers[terms[1]], registers["$at"], 0, 42);
             int result2 = encode_Itype(14, registers["$at"], registers["$at"], 1);
             write_binary(result1, inst_outfile);
             write_binary(result2, inst_outfile);
+            i++;
         }else if (inst_type == "seq") {
             int result1 = encode_Rtype(0, registers[terms[1]], registers[terms[2]], registers["$at"], 0, 38);
             int result2 = encode_Itype(10, registers["$at"], registers["$at"], 1);
             write_binary(result1, inst_outfile);
             write_binary(result2, inst_outfile);
+            i++;
         }else if (inst_type == "sne") {
             int result1 = encode_Rtype(0, registers[terms[1]], registers[terms[2]], registers["$at"], 0, 38);
             int result2 = encode_Rtype(0, 0, registers["$at"], registers["$at"], 0, 43);
             write_binary(result1, inst_outfile);
             write_binary(result2, inst_outfile);
+            i++;
         } else if (inst_type == "blt") {
         // slt $at, rs, rt
         write_binary(encode_Rtype(0, registers[terms[1]], registers[terms[2]], registers["$at"], 0, 42), inst_outfile);
         // bne $at, $zero, label
         int off = offsets[terms[3]] - (i + 1);
         write_binary(encode_Itype(5, registers["$at"], registers["$zero"], off), inst_outfile);
+        i++;
         } else if (inst_type == "bge") {
         // slt $at, rs, rt
         write_binary(encode_Rtype(0, registers[terms[1]], registers[terms[2]], registers["$at"], 0, 42), inst_outfile);
         // beq $at, $zero, label
         int off = offsets[terms[3]] - (i + 1);
         write_binary(encode_Itype(4, registers["$at"], registers["$zero"], off), inst_outfile);
+        i++;
         } else if (inst_type == "bgt") {
         // slt $at, rt, rs
         write_binary(encode_Rtype(0, registers[terms[2]], registers[terms[1]], registers["$at"], 0, 42), inst_outfile);
         // bne $at, $zero, label
         int off = offsets[terms[3]] - (i + 1);
         write_binary(encode_Itype(5, registers["$at"], registers["$zero"], off), inst_outfile);
+        i++;
         } else if (inst_type == "ble") {
         // slt $at, rt, rs
         write_binary(encode_Rtype(0, registers[terms[2]], registers[terms[1]], registers["$at"], 0, 42), inst_outfile);
         // beq $at, $zero, label
         int off = offsets[terms[3]] - (i + 1);
         write_binary(encode_Itype(4, registers["$at"], registers["$zero"], off), inst_outfile);
+        i++;
         } 
     } //increment counting index
     }
