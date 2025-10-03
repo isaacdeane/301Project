@@ -226,6 +226,7 @@ int main(int argc, char* argv[]) {
      for(std::string inst : instructions) {
         std::vector<std::string> terms = split(inst, WHITESPACE+",()");
         std::string inst_type = terms[0];
+        std::cout << i << std::endl;
         if (inst_type == "add") { // R-TYPES: encode_Rtype(int opcode, int rs, int rt, int rd, int shftamt, int funccode)
             int result = encode_Rtype(0,registers[terms[2]], registers[terms[3]], registers[terms[1]], 0, 32);
             write_binary(encode_Rtype(0,registers[terms[2]], registers[terms[3]], registers[terms[1]], 0, 32),inst_outfile);
@@ -287,10 +288,12 @@ int main(int argc, char* argv[]) {
             int result = encode_Itype(43, registers[terms[3]], registers[terms[1]], offset);
             write_binary(encode_Itype(43, registers[terms[3]], registers[terms[1]], offset), inst_outfile);
         } else if (inst_type == "beq") {
+            //std::cout << (offsets[terms[3]]) << std::endl;
             int offset = offsets[terms[3]] - (i+1);
             int result = encode_Itype(4, registers[terms[1]], registers[terms[2]], offset);
             write_binary(encode_Itype(4, registers[terms[1]], registers[terms[2]], offset), inst_outfile);
         } else if (inst_type == "bne") {
+            //std::cout << offsets[terms[3]] << std::endl;
             int offset = offsets[terms[3]] - (i+1);
             int result = encode_Itype(5, registers[terms[1]], registers[terms[2]], offset);
             write_binary(encode_Itype(5, registers[terms[1]], registers[terms[2]], offset), inst_outfile);
@@ -394,8 +397,7 @@ int main(int argc, char* argv[]) {
         // beq $at, $zero, label
         int off = offsets[terms[3]] - (i + 1);
         write_binary(encode_Itype(4, registers["$at"], registers["$zero"], off), inst_outfile);
-    i++;} //increment counting index
+        } 
+    } //increment counting index
     }
-}
-
 #endif
