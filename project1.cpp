@@ -69,8 +69,6 @@ int main(int argc, char* argv[]) {
                 continue;
             }
 
-            std::vector<std::string> parts = split(str, WHITESPACE + ",()");
-
             // Switch to .text section
             if (str == ".text") {
                 in_text = true;
@@ -83,6 +81,29 @@ int main(int argc, char* argv[]) {
                 instructions.push_back(str);
                 continue;
             }
+
+            // Detect and store ".asciiz"
+            // Expecting outputs like { "greeting": 0, "arr": 56, "val1": 64 }
+            if (!in_text && str.find(".asciiz") != std::string::npos) {
+                size_t asz   = str.find(".asciiz"); // Look for the start of .asciiz
+                size_t colon = str.find(':');     // Look for the colon (label)
+                if (colon != std::string::npos && colon < asz) {
+                    std::string label = rtrim(ltrim(str.substr(0, colon)));
+                    if (!label.empty()) {
+                        static_memory[label] = static_mem_body;
+                    }
+                }
+                size_t q1 = str.find('"', asz);   // Look for the first "
+                size_t q2 = (q1 == std::string::npos) ? std::string::npos : str.rfind('"');   // Look for the second "
+                std::string raw = str.substr(q1 + 1, q2 - q1 - 1); 
+                int n = (int)raw.size();
+                // 4 bytes/char + 4 bytes for terminating '\0'
+                static_mem_body += 4 * (n + 1);
+                instructions.push_back(str);
+                continue;           
+            }
+
+            std::vector<std::string> parts = split(str, WHITESPACE + ",()");
 
             // Detect and store label lines (like "main:", "loop:")
             if (parts.size() < 2 && !parts.empty() && parts[0].back() == ':') {
@@ -132,6 +153,31 @@ int main(int argc, char* argv[]) {
 
     int memory_address = 0; // Address within static memory (starts at 0)
     for (std::string inst : instructions) {
+        // Deal with .asciiz
+        size_t asz = inst.find(".asciiz");
+        if (asz != std::string::npos) {
+            size_t colon = inst.find(':');
+            if (colon != std::string::npos && colon < asz) {
+                std::string label = rtrim(ltrim(inst.substr(0, colon)));
+                auto it = static_memory.find(label);
+            }
+            size_t q1 = inst.find('"', asz);
+            size_t q2 = (q1 == std::string::npos) ? std::string::npos: inst.find('"', q1 + 1);
+            if (q1 == std::string::npos || q2 == std::string::npos || q2 <= q1) {
+                std::cerr << "[Phase2] .asciiz missing quotes: " << inst << "\n";
+                exit(1);
+            }
+            std::string raw = inst.substr(q1 + 1, q2 - q1 - 1);
+            for (unsigned char ch : raw) {
+                write_binary(static_cast<int>(ch), static_outfile); 
+                memory_address += 4;
+            }
+            write_binary(0, static_outfile);
+            memory_address += 4;
+            continue; 
+        }
+
+        // Deal with .word
         std::vector<std::string> terms = split(inst, WHITESPACE+",()");
         
         if (terms.size() < 2) continue;
@@ -348,8 +394,8 @@ int main(int argc, char* argv[]) {
         // beq $at, $zero, label
         int off = offsets[terms[3]] - (i + 1);
         write_binary(encode_Itype(4, registers["$at"], registers["$zero"], off), inst_outfile);
-i++;} //increment counting index
-
+    i++;} //increment counting index
+    }
 }
 
 #endif
