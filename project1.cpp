@@ -10,6 +10,9 @@
 #include <fstream>
 #include <unordered_set>
 
+#include <exception>  
+#include <stdexcept> 
+
 // Define a set of valid MIPS operation mnemonics for instruction validation
 const std::unordered_set<std::string> MIPS_OPS = {
     "add", "sub", "sll", "srl", "mult", "div", "mflo", "mfhi", "slt",
@@ -131,20 +134,30 @@ int main(int argc, char* argv[]) {
     for (std::string inst : instructions) {
         std::vector<std::string> terms = split(inst, WHITESPACE+",()");
         
+        if (terms.size() < 2) continue;
+        
         std::string label = terms[0];
         if (label.back() == ':') {
             label.pop_back();
         }
+
+        if (terms[1] != ".word") continue;
 
         // Loop through all values after ".word"
         for (int i = 2; i < terms.size(); ++i) {
             int value;
 
             // If the term is a known label, use its offset
-            if (offsets.find(terms[i]) != offsets.end()) {
+            try {
+                if (offsets.find(terms[i]) != offsets.end()) {
                 value = offsets.at(terms[i]) * 4;
-            } else {
+                } else {
                 value = stoi(terms[i]);  // Not a label, regard it as an element
+                }
+            } catch (const std::exception& e) {
+                std::cerr << "[Phase2] invalid .word operand: '" << terms[i]
+                        << "' in line: " << inst << "\n";
+                exit(1);
             }
 
             write_binary(value, static_outfile);
@@ -244,5 +257,7 @@ int main(int argc, char* argv[]) {
             write_binary(encode_Itype(8, registers["$zero"], registers[terms[1]], address), inst_outfile);
         }
 i++;} //increment counting index
+
+}
 
 #endif
