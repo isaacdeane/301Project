@@ -46,6 +46,8 @@ int main(int argc, char* argv[]) {
 
     //For each input file:
 
+    // Need to detect all the pseudoinstructions.
+
     int static_mem_body = 0; // Tracker for static mem body
     int line_num = 0; // Tracker for the current instruction
 
@@ -384,30 +386,39 @@ int main(int argc, char* argv[]) {
                 i++;
             }
         } else if (inst_type == "sge") {
+            // slt $at, rs, rt
             int result1 = encode_Rtype(0, registers[terms[1]], registers[terms[2]], registers["$at"], 0, 42);
-            int result2 = encode_Itype(14, registers["$at"], registers["$at"], 1); 
+            // xori $at, $at, 1
+            int result2 = encode_Itype(14, registers["$at"], registers["$at"], 1); // destination should be rd
             write_binary(result1, inst_outfile);
             write_binary(result2, inst_outfile);
-            i++;
+            i = i + 2; // line number should increment by 2
         }
         else if (inst_type == "sgt") {
+            // slt rd rs rt
             int result = encode_Rtype(0, registers[terms[2]], registers[terms[1]], registers[terms[1]], 0, 42);
             write_binary(result, inst_outfile);
             i++;
         }else if (inst_type == "sle") {
+            // slt $at rt rs
             int result1 = encode_Rtype(0, registers[terms[2]], registers[terms[1]], registers["$at"], 0, 42);
+            // xori $at, $at, 1
             int result2 = encode_Itype(14, registers["$at"], registers["$at"], 1);
             write_binary(result1, inst_outfile);
             write_binary(result2, inst_outfile);
             i++;
         }else if (inst_type == "seq") {
+            // xor $at, rs, rt
             int result1 = encode_Rtype(0, registers[terms[1]], registers[terms[2]], registers["$at"], 0, 38);
+            // slti $at, $at, 1 
             int result2 = encode_Itype(10, registers["$at"], registers["$at"], 1);
             write_binary(result1, inst_outfile);
             write_binary(result2, inst_outfile);
             i++;
         }else if (inst_type == "sne") {
+            // xor $at, rs, rt
             int result1 = encode_Rtype(0, registers[terms[1]], registers[terms[2]], registers["$at"], 0, 38);
+            // slt $at, $zero, $at
             int result2 = encode_Rtype(0, 0, registers["$at"], registers["$at"], 0, 43);
             write_binary(result1, inst_outfile);
             write_binary(result2, inst_outfile);
