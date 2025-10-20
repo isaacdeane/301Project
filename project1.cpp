@@ -23,6 +23,43 @@ const std::unordered_set<std::string> MIPS_OPS = {
     "mov", "li", "sge", "sgt", "sle", "seq", "sne"
 };
 
+// Detect pseudpintructions
+// - sge/sle/seq/sne/blt/bge/bgt/ble => 2
+// - sgt/mov/la => 1 
+// - li => depends n the size
+// - else real instructions => 1 条
+static int expanded_size_for(const std::vector<std::string>& parts) {
+    if (parts.empty()) return 0;
+    const std::string& op = parts[0];
+
+    if (op.size() && op.back() == '.') return 0;
+
+    // pseudoinstruction
+    static const std::unordered_set<std::string> two_inst_pseudos = {
+        "sge", "sle", "seq", "sne", "blt", "bge", "bgt", "ble"
+    };
+
+    if (two_inst_pseudos.count(op)) return 2;
+
+    if (op == "sgt" || op == "mov" || op == "la") return 1;
+
+    // li depends on the number size
+    if (op == "li") {
+        if (parts.size() >= 3) {
+            try {
+                long long imm = std::stoll(parts[2]);
+                if (imm >= -32768 && imm <= 32767) return 1; // addi
+                return 2; // lui + ori
+            } catch (...) {
+                return 2;
+            }
+        }
+        return 2; 
+    }
+
+    return 1;
+}
+
 int main(int argc, char* argv[]) {
     if (argc < 4) // Checks that at least 3 arguments are given in command line
     {
@@ -46,7 +83,6 @@ int main(int argc, char* argv[]) {
 
     //For each input file:
 
-    // Need to detect all the pseudoinstructions.
 
     int static_mem_body = 0; // Tracker for static mem body
     int line_num = 0; // Tracker for the current instruction
@@ -141,7 +177,8 @@ int main(int argc, char* argv[]) {
                     offsets[label] = line_num;
                 }
                 pending_labels.clear();
-                line_num++;
+                int add = expanded_size_for(parts);
+                line_num += add;
             }
         }
         infile.close();
@@ -383,75 +420,75 @@ int main(int argc, char* argv[]) {
                 int ori_inst = encode_Itype(13, registers[terms[1]], registers[terms[1]], lower);  // ori $rd, $rd, lower
                 write_binary(lui_inst, inst_outfile);
                 write_binary(ori_inst, inst_outfile);
-                i++;
+                i += 2;
             }
         } else if (inst_type == "sge") {
             // slt $at, rs, rt
-            int result1 = encode_Rtype(0, registers[terms[1]], registers[terms[2]], registers["$at"], 0, 42);
-            // xori $at, $at, 1
-            int result2 = encode_Itype(14, registers["$at"], registers["$at"], 1); // destination should be rd
+            int result1 = encode_Rtype(0, registers[terms[2]], registers[terms[3]], registers["$at"], 0, 42);
+            // xori rd, $at, 1
+            int result2 = encode_Itype(14, registers["$at"], registers[terms[1]], 1); // destination should be rd
             write_binary(result1, inst_outfile);
             write_binary(result2, inst_outfile);
             i = i + 2; // line number should increment by 2
         }
         else if (inst_type == "sgt") {
-            // slt rd rs rt
-            int result = encode_Rtype(0, registers[terms[2]], registers[terms[1]], registers[terms[1]], 0, 42);
+            // slt rd, rt, rs
+            int result = encode_Rtype(0, registers[terms[3]], registers[terms[2]], registers[terms[1]], 0, 42);
             write_binary(result, inst_outfile);
             i++;
         }else if (inst_type == "sle") {
-            // slt $at rt rs
+            // slt $at, rt, rs
             int result1 = encode_Rtype(0, registers[terms[2]], registers[terms[1]], registers["$at"], 0, 42);
-            // xori $at, $at, 1
-            int result2 = encode_Itype(14, registers["$at"], registers["$at"], 1);
+            // xori rd, $at, 1
+            int result2 = encode_Itype(14, registers["$at"], registers[terms[1]], 1);
             write_binary(result1, inst_outfile);
             write_binary(result2, inst_outfile);
-            i++;
+            i += 2;
         }else if (inst_type == "seq") {
             // xor $at, rs, rt
-            int result1 = encode_Rtype(0, registers[terms[1]], registers[terms[2]], registers["$at"], 0, 38);
-            // slti $at, $at, 1 
-            int result2 = encode_Itype(10, registers["$at"], registers["$at"], 1);
+            int result1 = encode_Rtype(0, registers[terms[2]], registers[terms[3]], registers["$at"], 0, 38);
+            // sltiu rd, $at, 1 
+            int result2 = encode_Itype(11, registers["$at"], registers[terms[1]], 1);
             write_binary(result1, inst_outfile);
             write_binary(result2, inst_outfile);
-            i++;
+            i += 2;
         }else if (inst_type == "sne") {
             // xor $at, rs, rt
-            int result1 = encode_Rtype(0, registers[terms[1]], registers[terms[2]], registers["$at"], 0, 38);
-            // slt $at, $zero, $at
-            int result2 = encode_Rtype(0, 0, registers["$at"], registers["$at"], 0, 43);
+            int result1 = encode_Rtype(0, registers[terms[2]], registers[terms[3]], registers["$at"], 0, 38);
+            // slt rd, $zero, $at
+            int result2 = encode_Rtype(0, registers["$zero"], registers["$at"], registers[terms[1]], 0, 43);
             write_binary(result1, inst_outfile);
             write_binary(result2, inst_outfile);
-            i++;
+            i += 2;
         } else if (inst_type == "blt") {
-        // slt $at, rs, rt
-        write_binary(encode_Rtype(0, registers[terms[1]], registers[terms[2]], registers["$at"], 0, 42), inst_outfile);
-        // bne $at, $zero, label
-        int off = offsets[terms[3]] - (i + 1);
-        write_binary(encode_Itype(5, registers["$at"], registers["$zero"], off), inst_outfile);
-        i++;
+            // slt $at, rs, rt
+            write_binary(encode_Rtype(0, registers[terms[1]], registers[terms[2]], registers["$at"], 0, 42), inst_outfile);
+            // bne $at, $zero, label
+            int off = offsets[terms[3]] - (i + 1);
+            write_binary(encode_Itype(5, registers["$at"], registers["$zero"], off), inst_outfile);
+            i += 2;
         } else if (inst_type == "bge") {
-        // slt $at, rs, rt
-        write_binary(encode_Rtype(0, registers[terms[1]], registers[terms[2]], registers["$at"], 0, 42), inst_outfile);
-        // beq $at, $zero, label
-        int off = offsets[terms[3]] - (i + 1);
-        write_binary(encode_Itype(4, registers["$at"], registers["$zero"], off), inst_outfile);
-        i++;
+            // slt $at, rs, rt
+            write_binary(encode_Rtype(0, registers[terms[1]], registers[terms[2]], registers["$at"], 0, 42), inst_outfile);
+            // beq $at, $zero, label
+            int off = offsets[terms[3]] - (i + 1);
+            write_binary(encode_Itype(4, registers["$at"], registers["$zero"], off), inst_outfile);
+            i += 2;
         } else if (inst_type == "bgt") {
-        // slt $at, rt, rs
-        write_binary(encode_Rtype(0, registers[terms[2]], registers[terms[1]], registers["$at"], 0, 42), inst_outfile);
-        // bne $at, $zero, label
-        int off = offsets[terms[3]] - (i + 1);
-        write_binary(encode_Itype(5, registers["$at"], registers["$zero"], off), inst_outfile);
-        i++;
+            // slt $at, rt, rs
+            write_binary(encode_Rtype(0, registers[terms[2]], registers[terms[1]], registers["$at"], 0, 42), inst_outfile);
+            // bne $at, $zero, label
+            int off = offsets[terms[3]] - (i + 1);
+            write_binary(encode_Itype(5, registers["$at"], registers["$zero"], off), inst_outfile);
+            i += 2;
         } else if (inst_type == "ble") {
-        // slt $at, rt, rs
-        write_binary(encode_Rtype(0, registers[terms[2]], registers[terms[1]], registers["$at"], 0, 42), inst_outfile);
-        // beq $at, $zero, label
-        int off = offsets[terms[3]] - (i + 1);
-        write_binary(encode_Itype(4, registers["$at"], registers["$zero"], off), inst_outfile);
-        i++;
+            // slt $at, rt, rs
+            write_binary(encode_Rtype(0, registers[terms[2]], registers[terms[1]], registers["$at"], 0, 42), inst_outfile);
+            // beq $at, $zero, label
+            int off = offsets[terms[3]] - (i + 1);
+            write_binary(encode_Itype(4, registers["$at"], registers["$zero"], off), inst_outfile);
+            i += 2;
         } 
-    } //increment counting index
-    }
+    } 
+}
 #endif
