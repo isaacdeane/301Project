@@ -100,14 +100,69 @@ end TCL_Generic;&#13;
     <a name="circuit" val="CPUmain"/>
     <a name="circuitnamedboxfixedsize" val="true"/>
     <a name="simulationFrequency" val="1.0"/>
+    <comp lib="0" loc="(270,80)" name="Pin">
+      <a name="appearance" val="NewPins"/>
+      <a name="radix" val="16"/>
+      <a name="width" val="32"/>
+    </comp>
+    <comp lib="2" loc="(580,450)" name="Multiplexer">
+      <a name="selloc" val="tr"/>
+      <a name="width" val="32"/>
+    </comp>
     <comp loc="(1380,970)" name="regfile"/>
     <comp loc="(1610,500)" name="Control"/>
     <comp loc="(1970,990)" name="ALU"/>
+    <comp loc="(350,390)" name="regfile"/>
+    <comp loc="(520,80)" name="Control"/>
+    <comp loc="(860,390)" name="ALU"/>
+    <wire from="(100,390)" to="(100,510)"/>
+    <wire from="(100,390)" to="(130,390)"/>
+    <wire from="(100,510)" to="(880,510)"/>
+    <wire from="(110,370)" to="(110,410)"/>
+    <wire from="(110,370)" to="(590,370)"/>
+    <wire from="(110,410)" to="(130,410)"/>
+    <wire from="(270,80)" to="(300,80)"/>
+    <wire from="(350,390)" to="(440,390)"/>
+    <wire from="(350,410)" to="(420,410)"/>
+    <wire from="(420,410)" to="(420,440)"/>
+    <wire from="(420,440)" to="(550,440)"/>
+    <wire from="(440,390)" to="(440,410)"/>
+    <wire from="(440,410)" to="(640,410)"/>
+    <wire from="(520,100)" to="(590,100)"/>
+    <wire from="(520,120)" to="(560,120)"/>
+    <wire from="(520,140)" to="(530,140)"/>
+    <wire from="(520,160)" to="(570,160)"/>
+    <wire from="(520,180)" to="(540,180)"/>
+    <wire from="(520,200)" to="(520,340)"/>
+    <wire from="(520,80)" to="(620,80)"/>
+    <wire from="(530,140)" to="(530,460)"/>
+    <wire from="(530,460)" to="(550,460)"/>
+    <wire from="(540,180)" to="(540,350)"/>
+    <wire from="(560,120)" to="(560,430)"/>
+    <wire from="(570,160)" to="(570,360)"/>
+    <wire from="(580,450)" to="(600,450)"/>
+    <wire from="(590,100)" to="(590,370)"/>
+    <wire from="(600,430)" to="(600,450)"/>
+    <wire from="(600,430)" to="(640,430)"/>
+    <wire from="(620,390)" to="(640,390)"/>
+    <wire from="(620,80)" to="(620,390)"/>
+    <wire from="(70,350)" to="(540,350)"/>
+    <wire from="(70,350)" to="(70,430)"/>
+    <wire from="(70,430)" to="(130,430)"/>
+    <wire from="(80,360)" to="(570,360)"/>
+    <wire from="(80,360)" to="(80,450)"/>
+    <wire from="(80,450)" to="(130,450)"/>
+    <wire from="(860,390)" to="(880,390)"/>
+    <wire from="(880,390)" to="(880,510)"/>
+    <wire from="(90,340)" to="(520,340)"/>
+    <wire from="(90,340)" to="(90,470)"/>
+    <wire from="(90,470)" to="(130,470)"/>
   </circuit>
   <circuit name="regfile">
-    <a name="appearance" val="custom"/>
+    <a name="appearance" val="logisim_evolution"/>
     <a name="circuit" val="regfile"/>
     <a name="circuitnamedboxfixedsize" val="true"/>
+    <a name="clabelup" val="south"/>
     <a name="simulationFrequency" val="1.0"/>
     <appear>
       <rect height="20" stroke="#000000" width="140" x="50" y="130"/>
@@ -757,7 +812,7 @@ end TCL_Generic;&#13;
     <wire from="(990,480)" to="(990,3030)"/>
   </circuit>
   <circuit name="ALU">
-    <a name="appearance" val="custom"/>
+    <a name="appearance" val="logisim_evolution"/>
     <a name="circuit" val="ALU"/>
     <a name="circuitnamedboxfixedsize" val="true"/>
     <a name="simulationFrequency" val="1.0"/>
@@ -777,7 +832,7 @@ end TCL_Generic;&#13;
       <circ-port dir="in" pin="200,200" x="50" y="100"/>
       <circ-port dir="in" pin="200,670" x="50" y="140"/>
       <circ-port dir="in" pin="720,50" x="120" y="60"/>
-      <circ-port dir="out" pin="1380,390" x="180" y="120"/>
+      <circ-port dir="out" pin="1230,210" x="180" y="120"/>
     </appear>
     <comp lib="0" loc="(1000,1420)" name="Splitter">
       <a name="bit1" val="0"/>
@@ -820,6 +875,14 @@ end TCL_Generic;&#13;
     <comp lib="0" loc="(1220,1830)" name="Constant">
       <a name="value" val="0x0"/>
     </comp>
+    <comp lib="0" loc="(1230,210)" name="Pin">
+      <a name="appearance" val="NewPins"/>
+      <a name="facing" val="west"/>
+      <a name="label" val="Res"/>
+      <a name="output" val="true"/>
+      <a name="radix" val="16"/>
+      <a name="width" val="32"/>
+    </comp>
     <comp lib="0" loc="(1240,1570)" name="Constant">
       <a name="value" val="0x0"/>
       <a name="width" val="32"/>
@@ -833,13 +896,6 @@ end TCL_Generic;&#13;
     </comp>
     <comp lib="0" loc="(1250,1910)" name="Constant">
       <a name="width" val="32"/>
-    </comp>
-    <comp lib="0" loc="(1380,390)" name="Pin">
-      <a name="appearance" val="NewPins"/>
-      <a name="facing" val="west"/>
-      <a name="label" val="Res"/>
-      <a name="output" val="true"/>
-      <a name="width" val="8"/>
     </comp>
     <comp lib="0" loc="(200,200)" name="Pin">
       <a name="appearance" val="NewPins"/>
@@ -1313,51 +1369,51 @@ end TCL_Generic;&#13;
       <a name="label" val="LO"/>
       <a name="width" val="32"/>
     </comp>
-    <comp lib="8" loc="(398,1778)" name="Text">
-      <a name="font" val="SansSerif plain 12"/>
-      <a name="text" val="clz"/>
-    </comp>
-    <comp lib="8" loc="(399,1459)" name="Text">
+    <comp lib="8" loc="(395,1455)" name="Text">
       <a name="font" val="SansSerif plain 12"/>
       <a name="text" val="clo"/>
     </comp>
-    <comp lib="8" loc="(484,789)" name="Text">
+    <comp lib="8" loc="(395,1775)" name="Text">
+      <a name="font" val="SansSerif plain 12"/>
+      <a name="text" val="clz"/>
+    </comp>
+    <comp lib="8" loc="(480,785)" name="Text">
       <a name="font" val="SansSerif plain 12"/>
       <a name="text" val="slt"/>
     </comp>
-    <comp lib="8" loc="(487,689)" name="Text">
+    <comp lib="8" loc="(485,685)" name="Text">
       <a name="font" val="SansSerif plain 12"/>
       <a name="text" val="srl"/>
     </comp>
-    <comp lib="8" loc="(491,241)" name="Text">
-      <a name="font" val="SansSerif plain 12"/>
-      <a name="text" val="Sub"/>
-    </comp>
-    <comp lib="8" loc="(491,591)" name="Text">
-      <a name="font" val="SansSerif plain 12"/>
-      <a name="text" val="sll"/>
-    </comp>
-    <comp lib="8" loc="(493,103)" name="Text">
+    <comp lib="8" loc="(490,100)" name="Text">
       <a name="font" val="SansSerif plain 12"/>
       <a name="text" val="Add"/>
     </comp>
-    <comp lib="8" loc="(498,1323)" name="Text">
+    <comp lib="8" loc="(490,240)" name="Text">
+      <a name="font" val="SansSerif plain 12"/>
+      <a name="text" val="Sub"/>
+    </comp>
+    <comp lib="8" loc="(490,590)" name="Text">
+      <a name="font" val="SansSerif plain 12"/>
+      <a name="text" val="sll"/>
+    </comp>
+    <comp lib="8" loc="(495,1320)" name="Text">
       <a name="font" val="SansSerif plain 12"/>
       <a name="text" val="lui"/>
     </comp>
-    <comp lib="8" loc="(635,347)" name="Text">
+    <comp lib="8" loc="(635,345)" name="Text">
       <a name="font" val="SansSerif plain 12"/>
       <a name="text" val="Upper"/>
     </comp>
-    <comp lib="8" loc="(637,441)" name="Text">
+    <comp lib="8" loc="(635,440)" name="Text">
       <a name="font" val="SansSerif plain 12"/>
       <a name="text" val="Lower"/>
     </comp>
-    <comp lib="8" loc="(648,163)" name="Text">
+    <comp lib="8" loc="(645,160)" name="Text">
       <a name="font" val="SansSerif plain 12"/>
       <a name="text" val="mult"/>
     </comp>
-    <comp lib="8" loc="(654,245)" name="Text">
+    <comp lib="8" loc="(650,245)" name="Text">
       <a name="font" val="SansSerif plain 12"/>
       <a name="text" val="div"/>
     </comp>
@@ -1391,6 +1447,7 @@ end TCL_Generic;&#13;
     <wire from="(1080,1890)" to="(1110,1890)"/>
     <wire from="(1080,1910)" to="(1110,1910)"/>
     <wire from="(1080,1970)" to="(1120,1970)"/>
+    <wire from="(1080,210)" to="(1230,210)"/>
     <wire from="(1090,1400)" to="(1090,1410)"/>
     <wire from="(1090,1400)" to="(1100,1400)"/>
     <wire from="(1090,1500)" to="(1110,1500)"/>
@@ -2276,11 +2333,11 @@ end TCL_Generic;&#13;
       <a name="font" val="SansSerif plain 12"/>
       <a name="text" val="Op code"/>
     </comp>
-    <comp lib="8" loc="(465,2822)" name="Text">
+    <comp lib="8" loc="(465,2820)" name="Text">
       <a name="font" val="SansSerif plain 12"/>
       <a name="text" val="5:0"/>
     </comp>
-    <comp lib="8" loc="(468,2987)" name="Text">
+    <comp lib="8" loc="(465,2985)" name="Text">
       <a name="font" val="SansSerif plain 12"/>
       <a name="text" val="25:21"/>
     </comp>
@@ -2292,27 +2349,27 @@ end TCL_Generic;&#13;
       <a name="font" val="SansSerif plain 12"/>
       <a name="text" val="20:16"/>
     </comp>
-    <comp lib="8" loc="(623,2917)" name="Text">
+    <comp lib="8" loc="(620,2915)" name="Text">
       <a name="font" val="SansSerif plain 12"/>
       <a name="text" val="15:11"/>
     </comp>
-    <comp lib="8" loc="(660,2884)" name="Text">
+    <comp lib="8" loc="(660,2880)" name="Text">
       <a name="font" val="SansSerif plain 12"/>
       <a name="text" val="10:6"/>
     </comp>
-    <comp lib="8" loc="(691,279)" name="Text">
-      <a name="font" val="SansSerif plain 12"/>
-      <a name="text" val="addi"/>
-    </comp>
-    <comp lib="8" loc="(694,2346)" name="Text">
+    <comp lib="8" loc="(690,2345)" name="Text">
       <a name="font" val="SansSerif plain 12"/>
       <a name="text" val="ori"/>
     </comp>
-    <comp lib="8" loc="(696,2280)" name="Text">
+    <comp lib="8" loc="(690,275)" name="Text">
+      <a name="font" val="SansSerif plain 12"/>
+      <a name="text" val="addi"/>
+    </comp>
+    <comp lib="8" loc="(695,2280)" name="Text">
       <a name="font" val="SansSerif plain 12"/>
       <a name="text" val="andi"/>
     </comp>
-    <comp lib="8" loc="(696,2414)" name="Text">
+    <comp lib="8" loc="(695,2410)" name="Text">
       <a name="font" val="SansSerif plain 12"/>
       <a name="text" val="xori"/>
     </comp>
@@ -2320,19 +2377,19 @@ end TCL_Generic;&#13;
       <a name="font" val="SansSerif plain 12"/>
       <a name="text" val="lui"/>
     </comp>
-    <comp lib="8" loc="(709,1574)" name="Text">
+    <comp lib="8" loc="(705,1570)" name="Text">
       <a name="font" val="SansSerif plain 12"/>
       <a name="text" val="beq"/>
     </comp>
-    <comp lib="8" loc="(711,1643)" name="Text">
+    <comp lib="8" loc="(710,1640)" name="Text">
       <a name="font" val="SansSerif plain 12"/>
       <a name="text" val="bne"/>
     </comp>
-    <comp lib="8" loc="(719,1454)" name="Text">
+    <comp lib="8" loc="(715,1450)" name="Text">
       <a name="font" val="SansSerif plain 12"/>
       <a name="text" val="lw"/>
     </comp>
-    <comp lib="8" loc="(721,1510)" name="Text">
+    <comp lib="8" loc="(720,1510)" name="Text">
       <a name="font" val="SansSerif plain 12"/>
       <a name="text" val="sw"/>
     </comp>
