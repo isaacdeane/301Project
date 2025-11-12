@@ -63,14 +63,14 @@ void write_binary(int value,std::ofstream &outfile)
 
 // Utility function for encoding an arithmetic "R" type function
 int encode_Rtype(int opcode, int rs, int rt, int rd, int shftamt, int funccode) {
-    return (opcode << 26) + (rs << 21) + (rt << 16) + (rd << 11) + (shftamt << 6) + funccode;
+    return (opcode << 26) + (rs << 21) + (rt << 16) + (rd << 11) + (shftamt << 6) + funccode; // << is a bit shifting operation. Example 0010 << 2 = 1000
 }
 // Hint: What other instruction types need to be encoded?
 int encode_Itype(int opcode, int rs, int rt, int immediate) {
     return (opcode << 26) + (rs << 21) + (rt << 16) + (immediate & 0xFFFF); // & 0xFFFF grabs the lowest 16 bits of immediate
 }
 int encode_Jtype(int opcode, int address) {
-    return (opcode << 26) + (address & 0x3FFFFFF);
+    return (opcode << 26) + (address & 0x3FFFFFF); // & 0x3FFFFFF grabs the lowest 26 bits of address
 }
 
 

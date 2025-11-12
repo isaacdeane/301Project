@@ -12,6 +12,7 @@ main:
   add $t0, $a0, $zero #number of times to iterate
   addi $t1, $a1, 4 #pointer to iterate through array
   addi $t8, $zero, -1
+
 initloop:
   sw $t8, 0($t1)
   addi $t1, $t1, 4
@@ -61,5 +62,6 @@ secondcalldone:
   addi $sp, $sp, 16
   jr $ra
 end:
+  # j end #modified for checkpoint 3
   addi $v0, $zero, 10
   syscall #End the program in QTSPIM
